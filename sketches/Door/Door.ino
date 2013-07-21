@@ -116,7 +116,7 @@ EthernetClient client;
 
 byte mac[] = { 
   MAC0, MAC1, MAC2, MAC3, MAC4, MAC5 };
-byte ip[] = { 
+byte remote_ip[] = { 
   IP0, IP1, IP2, IP3 };
   
 int authTryCount = 0;
@@ -170,7 +170,7 @@ void setUpClient( boolean secondTry ) {
   sprintf(postDataInit, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s", KEY_MAC, mac[0], mac[1],
     mac[2], mac[3], mac[4], mac[5], KEY_INIT, key);
   
-  free(key);
+  free(key);																														 // POTENTIAL ISSUE /////////////////////////
   
   if (client.connect(ip, REMOTE_SERVER_PORT)) {
     client.println("POST /api/v1/online.txt HTTP/1.1");
@@ -202,7 +202,7 @@ void setup( )
   setUpServer( );
   setUpClient( false );
   /*
-  char* readIt = "1234567890123456789012345678901234567890123456789012345678901234";
+   char* readIt = "1234567890123456789012345678901234567890123456789012345678901234";
    char* writeIt = (char*) malloc ( sizeof ( char ) * KEY_LENGTH );
    
    EEPROMx.writeToEEPROM( readIt );
@@ -220,7 +220,7 @@ void loop( )
     readFromClient( );
   }
   
-  if ( !client.connected( ) )
+  if ( !client.connected( ) && !client.available( ) )
   {
     client.stop( );
     if ( readStringIndex > 0 )
