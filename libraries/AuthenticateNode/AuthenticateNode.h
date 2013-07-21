@@ -56,16 +56,16 @@ char newInitKey[KEY_LENGTH+1];
 class AuthenticateNodeClass
 {
 	public:
-		char* start();
+		char* getOneTimeKey( );
 	
 	private:
-		char readString[CLIENT_BUFFER_LENGTH+1];
+		char readString[ CLIENT_BUFFER_LENGTH + 1 ];
 		int messageLength;
-		char status[STATUS_LENGTH+1];
-		char oneTimeKey[KEY_LENGTH+1];
-		char newInitKey[KEY_LENGTH+1];
+		char status[ STATUS_LENGTH + 1 ];
+		char oneTimeKey[ KEY_LENGTH + 1 ];
+		char newInitKey[ KEY_LENGTH + 1 ];
 		void processAuthenticationMessage( char* oneTimeKey );	// aka authorizeNode()
-		int processAuthenticationResult();
+		int processAuthenticationResult( );
 	
 };
 

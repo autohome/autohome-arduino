@@ -63,7 +63,7 @@
 #define MAC5 0x56
 #endif
 
-extern byte mac[];// = { 
+extern byte mac[ ];// = { 
 //   MAC0, MAC1, MAC2, MAC3, MAC4, MAC5 };
 
 
@@ -90,7 +90,7 @@ extern byte mac[];// = {
 #define IP3 131 //131 is me, 114 is brian's dev environment
 #endif
 // 
-extern byte ip[];// = { 
+extern byte ip[ ];// = { 
 //   IP0, IP1, IP2, IP3 };
 
 
@@ -110,17 +110,17 @@ const char LF = 10;
 class ClientDefinitionsClass
 {	
 	public:
-		ClientDefinitionsClass();
-		void setupServer();
-		int receiveClientMessage(char* readString);
+		ClientDefinitionsClass( );
+		void setupServer( );
+		int receiveClientMessage( char* readString );
 	  EthernetClient client;
 		
 	private:
 		EthernetServer server;
 		int readStringIndex;
 		int crlfCount;
-		void initEthernet();
-		void readFromClient(char* readString, bool *lastCharWasCR, bool *lastCharWasLF);
+		void initEthernet( );
+		void readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF );
 		void setupClient( boolean secondTry, int *authTryCount );
 
 };

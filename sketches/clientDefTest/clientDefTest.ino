@@ -8,7 +8,8 @@
 #define LOCAL_SERVER_PORT 8080
 #endif
 
-void setup(){
+void setup( )
+{
 
 		
 		//int mac = 10;
@@ -18,7 +19,7 @@ void setup(){
 //		ClientDefinitionsClass test(mac,LOCAL_SERVER_PORT);
 
 		AuthenticateNodeClass test;
-                test.start();
+                test.getOneTimeKey( );
 }
   
-void loop(){}
+void loop( ) { }

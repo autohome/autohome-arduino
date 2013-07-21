@@ -5,7 +5,7 @@
 
 // start(): the top function called from node setup() method, handels authentication of node and returns a pointer to the new one-time key
 
-char* AuthenticateNodeClass::start( )
+char* AuthenticateNodeClass::getOneTimeKey( )
 {
 	ClientDefinitionsClass test;
 	char oneTimeKey[ KEY_LENGTH + 1 ];
@@ -22,7 +22,8 @@ char* AuthenticateNodeClass::start( )
 	Serial.println( "Cleint disconnected" );
   test.client.stop( );
 
-  if( messageLength > 0 ) {
+  if( messageLength > 0 )
+	{
 		Serial.println( "processAuthenticationMessage here" );
     processAuthenticationMessage( oneTimeKey );
 		return oneTimeKey;
@@ -44,13 +45,13 @@ void AuthenticateNodeClass::processAuthenticationMessage( char* oneTimeKey )
 	Serial.println( readString );
 	
 	// Get status
-	strncpy ( status, strstr ( &readString[0], PARM_STATUS ) + strlen( PARM_STATUS ), STATUS_LENGTH ); // Get start of status
+	strncpy ( status, strstr ( &readString[ 0 ], PARM_STATUS ) + strlen( PARM_STATUS ), STATUS_LENGTH ); // Get start of status
 	
 	Serial.print ( "All text following status: " );
 	Serial.println ( status );
 	
 	// If successfully verified key
-	if( atoi(status) == 0 )
+	if( atoi( status ) == 0 )
 	{
 		Serial.println( "Suceeded in verifying key." );
 		
