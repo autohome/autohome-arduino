@@ -6,7 +6,7 @@
 
 //EthernetServer server;
 
-// ClientDefinitionsClass Constructor class: initializes EthernetServer server via an "initialization list" and then
+// ClientDefinitions Constructor class: initializes EthernetServer server via an "initialization list" and then
 //																						the rest of the server/ethernet setup
 
 byte mac[ ] = { 
@@ -15,27 +15,31 @@ byte mac[ ] = {
 byte ip[ ] = { 
   IP0, IP1, IP2, IP3 };
 
-ClientDefinitionsClass::ClientDefinitionsClass( ) : 
+ClientDefinitions::ClientDefinitions( char * initKey ) : 
 server( LOCAL_SERVER_PORT )	// initialization list
 {
-	char postDataInit[ 123 ];
-	int authTryCount = 0;
+	//char postData[ POST_DATA_LENGTH ];
+	unsigned char authTryCount = 0;
   Serial.begin( 9600 );
+
+	Serial.print( "Free ram: " );
+	Serial.println( freeRam( ) );
 	
 	initEthernet( );
 	server.begin( );
 	setupServer( );
-	setupClient( true, &authTryCount );
-	Serial.println( "Success." );
+	setupClient( false, &authTryCount, initKey );
+	//Serial.println( "Success." );
 }
 
-void ClientDefinitionsClass::initEthernet( )
+void ClientDefinitions::initEthernet( )
 {
   Serial.println( "Initializing ethernet port..." );
   Ethernet.begin( mac );
+	Serial.println( "Ethernet port initialized." );
 }
 
-void ClientDefinitionsClass::setupServer( )
+void ClientDefinitions::setupServer( )
 {
   Serial.print( "Starting server..." );
   server.begin( );
@@ -45,17 +49,17 @@ void ClientDefinitionsClass::setupServer( )
 
 // setupClient(): initialize communication client between local node (arduino) and remote server
 
-void ClientDefinitionsClass::setupClient( boolean secondTry, int *authTryCount )
+void ClientDefinitions::setupClient( boolean secondTry, unsigned char *authTryCount, char * initKey )
 {
 	char key[ KEY_LENGTH + 1 ];
-	char postDataInit[ 123 ];
+	char postData[ POST_DATA_LENGTH + 1 ];
 	
   Serial.println( "Starting client..." );
   // Build payload
   if ( secondTry == true )
 	{
 		// Use original initialization key if EEPROM key is invalid
-    strncpy( key, ORIG_INIT, KEY_LENGTH );
+    strncpy( key, initKey, KEY_LENGTH );
     *authTryCount = 1;
   }
 	else
@@ -66,59 +70,76 @@ void ClientDefinitionsClass::setupClient( boolean secondTry, int *authTryCount )
     Serial.print( key );
     Serial.println( "\"" );
   }
+
+	Serial.print("Free ram: ");
+	Serial.println(freeRam());
   
-  sprintf( postDataInit, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s", KEY_MAC, mac[ 0 ], mac[ 1 ],
-    mac[ 2 ], mac[ 3 ], mac[ 4 ], mac[ 5 ], KEY_INIT, key );
+  sprintf(postData, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s", KEY_MAC, mac[0], mac[1],
+    mac[2], mac[3], mac[4], mac[5], KEY_INIT, key);
   
   if ( client.connect( ip, REMOTE_SERVER_PORT ) )
 	{
     Serial.println( "Client connected." );
+    Serial.print("postData: ");
+		Serial.println( postData );
+		Serial.print("postData length: ");
+		Serial.println( strlen( postData ) );
     client.println( "POST /api/v1/online.txt HTTP/1.1" );
     client.println( "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" ); 
     client.println( "Host: dev-environment:3000" );
     client.println( "Connection: close" );
     client.print( "Content-Length: " );
-    client.println( strlen( postDataInit ) );
+    client.println( strlen( postData ) );
     client.println( "" );
-    client.print( postDataInit );
+    client.print( postData );
   }
 	else
 	{
 		Serial.println( "Unable to connect to server." );
+		Serial.println( "DELAY" );
+		Serial.print("Free ram: ");
+		Serial.println(freeRam());
+		delay( 1000 );
 	}
 }
 
 
 // receiveClientMessage(): read from the client until no more data. Data stored in readString[]. readString[] passed by parent program.
 
-int ClientDefinitionsClass::receiveClientMessage( char* readString )
+int ClientDefinitions::receiveClientMessage( char* readString )
 {
 	bool lastCharWasCR = false;
 	bool lastCharWasLF = false;
-	readStringIndex = 0;
-	crlfCount = 0;
+	int readStringIndex = 0;
+	unsigned char crlfCount = 0;
 	// empty readString
-	memset( &readString, '0', sizeof( readString ) );
+	memset( readString, NULL, CLIENT_BUFFER_LENGTH );
 	
 	while ( client.available( ) )
 	{
-    readFromClient( readString, &lastCharWasCR, &lastCharWasLF );
-		Serial.println( "Cleint Read" );
+    readFromClient( readString, &lastCharWasCR, &lastCharWasLF, &readStringIndex, &crlfCount );
+		//Serial.print( "readFromClient result: " );
+		//Serial.println( readString );
   }
-	Serial.println( "Read Complete." );
+	Serial.println( "Successfully read message." );
+	
+	Serial.print("Free ram: ");
+	Serial.println(freeRam());
 	
 	return readStringIndex;	
 }
 
 // readFromClient(): read and append next character from client to readString[].
 
-void ClientDefinitionsClass::readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF )
+void ClientDefinitions::readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF, int *readStringIndex, unsigned char *crlfCount )
 {
   char c = client.read( );
-  if ( crlfCount >= 2 )
+  if ( ( *crlfCount ) >= 2 )
 	{
-    readString[ readStringIndex ] = c;
-    readStringIndex++;
+    memset( readString + *readStringIndex, c, sizeof( c ) );
+    ( *readStringIndex )++;
+		//Serial.print( "readFromClient result: " );
+		//Serial.println( readString );
   }
   
   if ( *lastCharWasLF )
@@ -132,15 +153,15 @@ void ClientDefinitionsClass::readFromClient( char* readString, bool *lastCharWas
 		{
       *lastCharWasCR = false;
       *lastCharWasLF = false;
-      if ( crlfCount != 2 )
+      if ( *crlfCount != 2 )
 			{
-        crlfCount = 0;
+        *crlfCount = 0;
       }
     }
   }
 	else if ( *lastCharWasCR && c == LF )
 	{
-    crlfCount++;
+    ( *crlfCount )++;
     *lastCharWasCR = false;
     *lastCharWasLF = true;
   }
@@ -152,4 +173,10 @@ void ClientDefinitionsClass::readFromClient( char* readString, bool *lastCharWas
 }
 
 
-//ClientDefinitionsClass ClientDefinitions;
+int ClientDefinitions::freeRam ( ) {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return ( int ) &v - ( __brkval == 0 ? ( int ) &__heap_start : ( int ) __brkval ); 
+}
+
+//ClientDefinitions ClientDefinitions;

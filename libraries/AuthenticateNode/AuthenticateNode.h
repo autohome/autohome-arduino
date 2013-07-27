@@ -2,6 +2,7 @@
 #define authenticateNode_h
 
 #include "Arduino.h"
+#include "ClientDefinitions.h"
 
 // authenticateNode.h: declares parameters associated with node authentication
 
@@ -53,22 +54,26 @@ char newInitKey[KEY_LENGTH+1];
 #define CLIENT_BUFFER_LENGTH 200
 #endif
 
-class AuthenticateNodeClass
+class AuthenticateNode
 {
 	public:
+		AuthenticateNode( );
+		AuthenticateNode( ClientDefinitions* clientPointer );
 		char* getOneTimeKey( );
 	
 	private:
-		char readString[ CLIENT_BUFFER_LENGTH + 1 ];
+		ClientDefinitions* test;
+		void setClientDefinitions( ClientDefinitions* clientPointer );
+	//	char readString[ CLIENT_BUFFER_LENGTH + 1 ];
 		int messageLength;
-		char status[ STATUS_LENGTH + 1 ];
+		//char status[ STATUS_LENGTH + 1 ];
 		char oneTimeKey[ KEY_LENGTH + 1 ];
-		char newInitKey[ KEY_LENGTH + 1 ];
-		void processAuthenticationMessage( char* oneTimeKey );	// aka authorizeNode()
+		//char newInitKey[ KEY_LENGTH + 1 ];
+		void processAuthenticationMessage( char* oneTimeKey, char * readString );	// aka authorizeNode()
 		int processAuthenticationResult( );
-	
+		int freeRam ( );
 };
 
-extern AuthenticateNodeClass AuthenticateNode;
+//extern AuthenticateNode AuthenticateNode;
 
 #endif

@@ -95,7 +95,7 @@
  * BEGIN Authorization Key Definitions                   *
  *********************************************************/
 #ifndef ORIG_INIT
-#define ORIG_INIT "cf678e9c220ffb85d73c815d64f32841ff248dd3e9b39711d5ddf007e48ee7ec"
+#define ORIG_INIT "cced0c7dd8502a7c89b91e8062febed254b3cdd48cea7f8e04c904cf58905395"
 #endif
 
 #define KEY_LENGTH 64		// both initialization and one-time key
@@ -197,6 +197,10 @@ void setupClient( boolean secondTry ) {
   
   if (client.connect(ip, REMOTE_SERVER_PORT)) {
     Serial.println("Client connected.");
+		Serial.print("postDataInit: ");
+		Serial.println( postDataInit );
+		Serial.print("postDataInit length: ");
+		Serial.println( strlen( postDataInit ) );
     client.println("POST /api/v1/online.txt HTTP/1.1");
     client.println("Content-Type: application/x-www-form-urlencoded; charset=UTF-8"); 
     client.println("Host: dev-environment:3000");
@@ -313,7 +317,7 @@ void loop() {
   
   if (client.available()) {                        // PARSE DATA TO RECEIVE RESULT AND STORE IN MEMORY
     readFromClient();
-	Serial.println("Cleint Read");
+	//Serial.println("Cleint Read");
   }
   
   if (!client.connected() && !client.available()) {

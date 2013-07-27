@@ -19,7 +19,7 @@ WIEGAND wg;
 #define LF 10
 
 #ifndef ORIG_INIT
-  #define ORIG_INIT "e77fa8afd1e3857ec42ec83618c86ec2ef830495e2a3f5101bbc3ea3beba240e"
+  #define ORIG_INIT "646ee1612cb113267b7c5848bb2a39301a7bd4faa8055b1fa383d3e5ab6cf991"
 #endif
 
 #define KEY_INIT "&initialization_key="
@@ -198,7 +198,7 @@ void setup() {
   memset(readString, 0, 255);
   
   initEthernet();
-  setupClient(false);
+  setupClient(true);
   setupServer();
 }
 

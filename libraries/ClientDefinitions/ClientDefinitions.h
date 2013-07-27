@@ -5,10 +5,6 @@
 #include <Ethernet.h>
 #include <SPI.h>
 
-#ifndef ORIG_INIT
-#define ORIG_INIT "09cff4df1aa9052c635b9c4dc53fa3c90029aa1e1e9c531849cbd231f52bcb9d"
-#endif
-
 
 /*********************************************************
  * BEGIN Port Definitions                                *
@@ -34,6 +30,10 @@
 
 #ifndef KEY_MAC
 #define KEY_MAC "mac_address="
+#endif
+
+#ifndef POST_DATA_LENGTH
+#define POST_DATA_LENGTH 123
 #endif
 
 /*********************************************************
@@ -101,30 +101,34 @@ extern byte ip[ ];// = {
 const char CR = 13;
 const char LF = 10;
 
+#ifndef CLIENT_BUFFER_LENGTH
+#define CLIENT_BUFFER_LENGTH 200
+#endif
 
 
 // ClientDefinitions.h: declares parameters associated with client communiction
 
 
 
-class ClientDefinitionsClass
+class ClientDefinitions
 {	
 	public:
-		ClientDefinitionsClass( );
+		ClientDefinitions( char * initKey );
 		void setupServer( );
 		int receiveClientMessage( char* readString );
 	  EthernetClient client;
 		
 	private:
 		EthernetServer server;
-		int readStringIndex;
-		int crlfCount;
+		//int readStringIndex;
+		//unsigned char crlfCount;
 		void initEthernet( );
-		void readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF );
-		void setupClient( boolean secondTry, int *authTryCount );
+		void readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF, int *readStringIndex, unsigned char *crlfCount );
+		void setupClient( boolean secondTry, unsigned char *authTryCount, char * initKey );
+		int freeRam ();
 
 };
 
-//extern ClientDefinitionsClass ClientDefinitions;
+//extern ClientDefinitions ClientDefinitions;
 
 #endif
