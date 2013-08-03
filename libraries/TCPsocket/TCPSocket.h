@@ -60,34 +60,34 @@
 #define POST_DATA_LENGTH 123
 #endif
 
-/*********************************************************
- * BEGIN MAC Address Byte Definitions                    *
- *********************************************************/
-#ifndef MAC0
-#define MAC0 0x00
-#endif
+// /*********************************************************
+//  * BEGIN MAC Address Byte Definitions                    *
+//  *********************************************************/
+// #ifndef MAC0
+// #define MAC0 0x00
+// #endif
+// 
+// #ifndef MAC1
+// #define MAC1 0x11
+// #endif
+// 
+// #ifndef MAC2
+// #define MAC2 0x22
+// #endif
+// 
+// #ifndef MAC3
+// #define MAC3 0x33
+// #endif
+// 
+// #ifndef MAC4
+// #define MAC4 0x44
+// #endif
+// 
+// #ifndef MAC5
+// #define MAC5 0x56
+// #endif
 
-#ifndef MAC1
-#define MAC1 0x11
-#endif
-
-#ifndef MAC2
-#define MAC2 0x22
-#endif
-
-#ifndef MAC3
-#define MAC3 0x33
-#endif
-
-#ifndef MAC4
-#define MAC4 0x44
-#endif
-
-#ifndef MAC5
-#define MAC5 0x56
-#endif
-
-extern byte mac[ ];// = { 
+// extern byte mac[ ];// = { 
 //   MAC0, MAC1, MAC2, MAC3, MAC4, MAC5 };
 
 
@@ -137,20 +137,21 @@ const char LF = 10;
 class TCPSocket
 {	
 	public:
-		TCPSocket( char * initKey );
-		void setupServer( );
+		TCPSocket( char * initKey, byte macReceived[ ] );
 		int receiveClientMessage( char* readString );
-	  EthernetClient client;
 		
 	private:
+		byte * mac;
 		EthernetServer server;
 		char * oneTimeKey;
+	  EthernetClient client;
 		//int readStringIndex;
 		//unsigned char crlfCount;
+		void setupServer( );
 		void initEthernet( );
 		void readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF, int *readStringIndex, unsigned char *crlfCount );
 		void setupClient( boolean secondTry, unsigned char *authTryCount, char * initKey );
-		char * initializeOneTimeKey( );
+		//char * initializeOneTimeKey( );
 		void processAuthenticationMessage( char * readString );
 		int freeRam ();
 

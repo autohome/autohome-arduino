@@ -120,6 +120,7 @@ class ClientDefinitions
 		
 	private:
 		EthernetServer server;
+		char * oneTimeKey;
 		//int readStringIndex;
 		//unsigned char crlfCount;
 		void initEthernet( );

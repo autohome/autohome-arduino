@@ -18,6 +18,9 @@ byte ip[ ] = {
 ClientDefinitions::ClientDefinitions( char * initKey ) : 
 server( LOCAL_SERVER_PORT )	// initialization list
 {
+	char * oneTimeKey;
+	memset( oneTimeKey, NULL, KEY_LENGTH + 1 );
+	
 	//char postData[ POST_DATA_LENGTH ];
 	unsigned char authTryCount = 0;
   Serial.begin( 9600 );

@@ -9,18 +9,19 @@
 // TCPSocket Constructor class: initializes EthernetServer server via an "initialization list" and then
 //																						the rest of the server/ethernet setup
 
-byte mac[ ] = { 
-  MAC0, MAC1, MAC2, MAC3, MAC4, MAC5 };
+//byte mac[ ] = { 
+//  MAC0, MAC1, MAC2, MAC3, MAC4, MAC5 };
 
 byte ip[ ] = { 
   IP0, IP1, IP2, IP3 };
 
-TCPSocket::TCPSocket( char * initKey ) : 
+TCPSocket::TCPSocket( char * initKey, byte macReceived[ ] ) : 
 server( LOCAL_SERVER_PORT )	// initialization list
 {
 	char * readString;
 	int messageLength;
 	
+	mac = macReceived;
 	oneTimeKey = ( char * ) malloc( KEY_LENGTH + 1 );	
 	readString = ( char * ) malloc( CLIENT_BUFFER_LENGTH + 1 );
 	
