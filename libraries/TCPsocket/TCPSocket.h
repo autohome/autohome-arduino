@@ -139,6 +139,7 @@ class TCPSocket
 	public:
 		TCPSocket( char * initKey, byte macReceived[ ] );
 		int receiveClientMessage( char* readString );
+		int sendClientMessage( char * uri, char * data );
 		
 	private:
 		byte * mac;

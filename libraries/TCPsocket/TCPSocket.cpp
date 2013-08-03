@@ -64,6 +64,8 @@ server( LOCAL_SERVER_PORT )	// initialization list
 	    status = processAuthenticationMessage( readString );
 	  }
 	}
+	
+	free( readString );
 }
 
 void TCPSocket::initEthernet( )
@@ -259,6 +261,46 @@ int TCPSocket::processAuthenticationMessage( char * readString )
 		}
 		
 		return atoi( status );
+}
+
+int TCPSocket::sendClientMessage( char * uri, char * data )
+{
+	char postData[ 250 + 1 ];
+	
+	Serial.print("Free ram: ");
+	Serial.println(freeRam());
+  
+  sprintf(postData, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s%s", KEY_MAC, mac[0], mac[1],
+    mac[2], mac[3], mac[4], mac[5], KEY_ONETIME, oneTimeKey, data);
+  
+  if ( client.connect( ip, REMOTE_SERVER_PORT ) )
+	{
+    Serial.println( "Client connected." );
+    Serial.print("postData: ");
+		Serial.println( postData );
+		Serial.print("postData length: ");
+		Serial.println( strlen( postData ) );
+    client.print( "POST " );
+			client.print( uri );
+			client.println( " HTTP/1.1" );
+    client.println( "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" ); 
+    client.println( "Host: dev-environment:3000" );
+    client.println( "Connection: close" );
+    client.print( "Content-Length: " );
+    client.println( strlen( postData ) );
+    client.println( "" );
+    client.print( postData );
+  }
+	else
+	{
+		Serial.println( "Unable to connect to server." );
+		Serial.println( "DELAY" );
+		Serial.print("Free ram: ");
+		Serial.println(freeRam());
+		delay( 1000 );
+	}
+	
+	return 0;
 }
 
 int TCPSocket::freeRam ( ) {
