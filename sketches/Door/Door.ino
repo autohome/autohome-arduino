@@ -5,7 +5,7 @@
 #include <Wiegand.h>
 
 #ifndef ORIG_INIT
-#define ORIG_INIT "928e98128beca68ee5a4bba83fb1d3eddfb7b9c2591e1596232e50a36d8f249f"
+#define ORIG_INIT "bd6b4bfea9930541b33ced8f2f7674ceb084836ae81d8452de7c00135bbe3632"
 #endif
 
 /*********************************************************

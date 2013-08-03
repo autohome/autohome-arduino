@@ -150,9 +150,9 @@ class TCPSocket
 		void setupServer( );
 		void initEthernet( );
 		void readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF, int *readStringIndex, unsigned char *crlfCount );
-		void setupClient( boolean secondTry, unsigned char *authTryCount, char * initKey );
+		void setupClient( boolean secondTry, char * initKey );
 		//char * initializeOneTimeKey( );
-		void processAuthenticationMessage( char * readString );
+		int processAuthenticationMessage( char * readString );
 		int freeRam ();
 
 };

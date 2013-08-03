@@ -28,7 +28,6 @@ server( LOCAL_SERVER_PORT )	// initialization list
 	memset( oneTimeKey, NULL, KEY_LENGTH + 1 );
 	
 	//char postData[ POST_DATA_LENGTH ];
-	unsigned char authTryCount = 0;
   Serial.begin( 9600 );
 
 	Serial.print( "Free ram: " );
@@ -37,36 +36,41 @@ server( LOCAL_SERVER_PORT )	// initialization list
 	initEthernet( );
 	server.begin( );
 	setupServer( );
-	setupClient( false, &authTryCount, initKey );
-	//Serial.println( "Success." );
 	
-	while( !client.available( ) )
+	for( int status = -1, i = 0; status != 0 && i < 2; i++ )
 	{
-		Serial.println( "Client not available." );
+		if( i == 0 ) setupClient( false, initKey );
+		else setupClient( true, initKey );
+		//Serial.println( "Success." );
+	
+		while( !client.available( ) )
+		{
+			Serial.println( "Client not available." );
+		}
+		Serial.println( "Client available." );
+	
+		messageLength = receiveClientMessage( readString );
+		Serial.print("Data received: ");
+		Serial.println( readString );
+
+		while( client.connected( ) || client.available( ) ) { }	// wait
+
+		//Serial.println( "Cleint disconnected" );
+	  client.stop( );
+
+	  if( messageLength > 0 )
+		{
+			// Serial.println( "processAuthenticationMessage here" );
+	    status = processAuthenticationMessage( readString );
+	  }
 	}
-	Serial.println( "Client available." );
-	
-	messageLength = receiveClientMessage( readString );
-	Serial.print("Data received: ");
-	Serial.println( readString );
-
-	while( client.connected( ) || client.available( ) ) { }	// wait
-
-	//Serial.println( "Cleint disconnected" );
-  client.stop( );
-
-  if( messageLength > 0 )
-	{
-		Serial.println( "processAuthenticationMessage here" );
-    processAuthenticationMessage( readString );
-  }
 }
 
 void TCPSocket::initEthernet( )
 {
-  Serial.println( "Initializing ethernet port..." );
+  Serial.print( "Initializing ethernet port..." );
   Ethernet.begin( mac );
-	Serial.println( "Ethernet port initialized." );
+	Serial.println( " done." );
 }
 
 void TCPSocket::setupServer( )
@@ -79,7 +83,7 @@ void TCPSocket::setupServer( )
 
 // setupClient(): initialize communication client between local node (arduino) and remote server
 
-void TCPSocket::setupClient( boolean secondTry, unsigned char *authTryCount, char * initKey )
+void TCPSocket::setupClient( boolean secondTry, char * initKey )
 {
 	char key[ KEY_LENGTH + 1 ];
 	char postData[ POST_DATA_LENGTH + 1 ];
@@ -90,7 +94,6 @@ void TCPSocket::setupClient( boolean secondTry, unsigned char *authTryCount, cha
 	{
 		// Use original initialization key if EEPROM key is invalid
     strncpy( key, initKey, KEY_LENGTH );
-    *authTryCount = 1;
   }
 	else
 	{
@@ -207,7 +210,7 @@ void TCPSocket::readFromClient( char* readString, bool *lastCharWasCR, bool *las
 // 																initializtion key into EEPROM and also stores a one-time key in RAM. If
 //																initialization failed retry with the original key.
 
-void TCPSocket::processAuthenticationMessage( char * readString )
+int TCPSocket::processAuthenticationMessage( char * readString )
 {
 	//char newInitKey[ KEY_LENGTH + 1 ];
 	char * status;
@@ -254,6 +257,8 @@ void TCPSocket::processAuthenticationMessage( char * readString )
 		          Serial.println ( oneTimeKey );
 			}
 		}
+		
+		return atoi( status );
 }
 
 int TCPSocket::freeRam ( ) {
