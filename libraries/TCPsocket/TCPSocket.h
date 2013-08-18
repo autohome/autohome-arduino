@@ -33,15 +33,15 @@
 #endif
 
 #ifndef KEY_INIT
-#define KEY_INIT "&initialization_key="
+#define KEY_INIT "&I=" // "&initialization_key="
 #endif
 
 #ifndef KEY_ONETIME
-#define KEY_ONETIME "&one_time_key="
+#define KEY_ONETIME "&O=" // "&one_time_key="
 #endif
 
 #ifndef KEY_MAC
-#define KEY_MAC "mac_address="
+#define KEY_MAC "M=" // "mac_address="
 #endif
 
 #ifndef PARM_STATUS
@@ -56,12 +56,12 @@
 #define PARM_NEW_INIT_KEY "newinit:"
 #endif
 
-#ifndef POST_DATA_LENGTH
-#define POST_DATA_LENGTH 123
+#ifndef POST_DATA_KEY_POSITION
+#define POST_DATA_KEY_POSITION 2+5*5+2*2+1 //32
 #endif
 
-#ifndef POST_DATA_KEY_POSITION
-#define POST_DATA_KEY_POSITION 59
+#ifndef POST_DATA_LENGTH
+#define POST_DATA_LENGTH 97 //POST_DATA_KEY_POSITION + KEY_LENGTH + 1 // 96 123
 #endif
 
 // /*********************************************************

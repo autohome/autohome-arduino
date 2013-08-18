@@ -18,6 +18,8 @@ byte ip[ ] = {
 TCPSocket::TCPSocket( char * initKey, byte macReceived[ ] ) : 
 server( LOCAL_SERVER_PORT )	// initialization list
 {
+	Serial.print( "Free ram at start of socket initialization: " );
+	Serial.println( freeRam( ) );
 	char * readString;
 	int messageLength;
 	
@@ -28,10 +30,9 @@ server( LOCAL_SERVER_PORT )	// initialization list
 	memset( oneTimeKey, NULL, KEY_LENGTH + 1 );
 	
 	//char postData[ POST_DATA_LENGTH ];
-  Serial.begin( 9600 );
 
-	Serial.print( "Free ram: " );
-	Serial.println( freeRam( ) );
+	// Serial.print( "Free ram: " );
+	// 	Serial.println( freeRam( ) );
 	
 	initEthernet( );
 	server.begin( );
@@ -98,7 +99,8 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
   if ( secondTry == true )
 	{
 		// Use original initialization key if EEPROM key is invalid
-    strncpy( key, initKey, KEY_LENGTH );
+    //strncpy( key, initKey, KEY_LENGTH );
+		strcpy( key, initKey );	// does not currently protect against wrong key length***
   }
 	else
 	{
@@ -109,11 +111,14 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
     Serial.println( "\"" );
   }
 
-	Serial.print("Free ram: ");
-	Serial.println(freeRam());
+	// Serial.print("Free ram: ");
+	// 	Serial.println(freeRam());
   
   sprintf( postData, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s", KEY_MAC, mac[0], mac[1],
     mac[2], mac[3], mac[4], mac[5], KEY_INIT, key );
+
+	Serial.print( "Characters at key position: " );
+	Serial.println( key );
   
   if ( client.connect( ip, REMOTE_SERVER_PORT ) )
 	{
@@ -135,8 +140,8 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
 	{
 		Serial.println( "Unable to connect to server." );
 		Serial.println( "DELAY" );
-		Serial.print("Free ram: ");
-		Serial.println(freeRam());
+		// Serial.print("Free ram: ");
+		// 		Serial.println(freeRam());
 		delay( 1000 );
 	}
 }
@@ -161,8 +166,8 @@ int TCPSocket::receiveClientMessage( char* readString )
   }
 	Serial.println( "Successfully read message." );
 	
-	Serial.print("Free ram: ");
-	Serial.println(freeRam());
+	// Serial.print("Free ram: ");
+	// 	Serial.println(freeRam());
 	
 	return readStringIndex;	
 }
@@ -270,8 +275,8 @@ int TCPSocket::sendClientMessage( char * uri, char * data )
 {
 	char postData[ 250 + 1 ];
 	
-	Serial.print("Free ram: ");
-	Serial.println(freeRam());
+	// Serial.print("Free ram: ");
+	// 	Serial.println(freeRam());
   
   sprintf(postData, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s%s", KEY_MAC, mac[0], mac[1],
     mac[2], mac[3], mac[4], mac[5], KEY_ONETIME, oneTimeKey, data);
@@ -298,8 +303,8 @@ int TCPSocket::sendClientMessage( char * uri, char * data )
 	{
 		Serial.println( "Unable to connect to server." );
 		Serial.println( "DELAY" );
-		Serial.print("Free ram: ");
-		Serial.println(freeRam());
+		// Serial.print("Free ram: ");
+		// 		Serial.println(freeRam());
 		delay( 1000 );
 	}
 	

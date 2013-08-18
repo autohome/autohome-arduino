@@ -7,9 +7,10 @@
 //char * packageDoorData( unsigned long rfidID );
 void sendRfidPackage( unsigned long rfidID, TCPSocket socket );
 void setupReader( );
+int freeRam ( );
 
 #ifndef ORIG_INIT
-#define ORIG_INIT "c0c3faf94c197162faf908f60694ed7099f4ac3e84f5e98964382d982f1341b7"
+#define ORIG_INIT "4a6514ad80ca58fb120538ed93c9c86ed682881074945bf4f29ea571a0454c60"
 #endif
 
 /*********************************************************
@@ -58,6 +59,9 @@ WIEGAND wg;
 
 void setup( )
 {
+	Serial.begin( 9600 );
+	Serial.print( "Free ram at start: " );
+	Serial.println( freeRam( ) );
 	delay( 1000 );
 	setupReader( );
 }
@@ -66,9 +70,12 @@ void loop( )
 {
 	static unsigned long rfidID;
 	static TCPSocket socket = TCPSocket( ORIG_INIT, mac );
+
 	
 	if( wg.available( ) )
   {
+		Serial.print( "Free ram: " );
+		Serial.println( freeRam( ) );
 		rfidID = wg.getCode( );
     //Serial.println( rfidID );
 		//Serial.println( packageDoorData( rfidID ) );
@@ -107,4 +114,10 @@ void sendRfidPackage( unsigned long rfidID, TCPSocket socket )
 void setupReader( )
 {
   wg.begin( );
+}
+
+int freeRam ( ) {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return ( int ) &v - ( __brkval == 0 ? ( int ) &__heap_start : ( int ) __brkval ); 
 }
