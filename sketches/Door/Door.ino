@@ -5,11 +5,11 @@
 #include <Wiegand.h>
 
 //char * packageDoorData( unsigned long rfidID );
-// void sendRfidPackage( unsigned long rfidID, TCPSocket socket );
+void sendRfidPackage( unsigned long rfidID, TCPSocket socket );
 void setupReader( );
 
 #ifndef ORIG_INIT
-#define ORIG_INIT "a33e39051021df7b3e12e84b3d0312c9182020257cdaa5d7307c1b58603508ea"
+#define ORIG_INIT "c0c3faf94c197162faf908f60694ed7099f4ac3e84f5e98964382d982f1341b7"
 #endif
 
 /*********************************************************
@@ -72,7 +72,7 @@ void loop( )
 		rfidID = wg.getCode( );
     //Serial.println( rfidID );
 		//Serial.println( packageDoorData( rfidID ) );
-		//sendRfidPackage( rfidID, socket );
+		sendRfidPackage( rfidID, socket );
   }
 }
 

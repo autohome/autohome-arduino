@@ -60,6 +60,10 @@
 #define POST_DATA_LENGTH 123
 #endif
 
+#ifndef POST_DATA_KEY_POSITION
+#define POST_DATA_KEY_POSITION 59
+#endif
+
 // /*********************************************************
 //  * BEGIN MAC Address Byte Definitions                    *
 //  *********************************************************/

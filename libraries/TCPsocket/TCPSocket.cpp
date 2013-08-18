@@ -87,8 +87,11 @@ void TCPSocket::setupServer( )
 
 void TCPSocket::setupClient( boolean secondTry, char * initKey )
 {
-	char key[ KEY_LENGTH + 1 ];
+	//char key[ KEY_LENGTH + 1 ];
+	char * key;
 	char postData[ POST_DATA_LENGTH + 1 ];
+	
+	key = &postData[ POST_DATA_KEY_POSITION ];
 	
   Serial.println( "Starting client..." );
   // Build payload
@@ -109,8 +112,8 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
 	Serial.print("Free ram: ");
 	Serial.println(freeRam());
   
-  sprintf(postData, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s", KEY_MAC, mac[0], mac[1],
-    mac[2], mac[3], mac[4], mac[5], KEY_INIT, key);
+  sprintf( postData, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s", KEY_MAC, mac[0], mac[1],
+    mac[2], mac[3], mac[4], mac[5], KEY_INIT, key );
   
   if ( client.connect( ip, REMOTE_SERVER_PORT ) )
 	{
