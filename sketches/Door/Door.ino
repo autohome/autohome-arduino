@@ -10,7 +10,7 @@ void setupReader( );
 int freeRam ( );
 
 #ifndef ORIG_INIT
-#define ORIG_INIT "4a6514ad80ca58fb120538ed93c9c86ed682881074945bf4f29ea571a0454c60"
+#define ORIG_INIT "12bc15089d985ebe0ff3e803170f94e68975325b9e2b60e1ed894a76b6ceb225"
 #endif
 
 /*********************************************************
@@ -56,6 +56,22 @@ WIEGAND wg;
 #define RFID_URI "/api/v1/auth/rfid.txt"
 #endif
 
+#ifndef PIN_DATA0
+#define PIN_DATA0 2
+#endif
+
+#ifndef PIN_DATA1
+#define PIN_DATA1 3
+#endif
+
+#ifndef PIN_LED
+#define PIN_LED 4
+#endif
+
+#ifndef PIN_BEEP
+#define PIN_BEEP 5
+#endif
+
 
 void setup( )
 {
@@ -96,9 +112,51 @@ void loop( )
 // }
 // 
 // 
+
+int processClientMessage( char* message, TCPSocket socket )
+{
+  int statusInt;
+  char * status;
+  
+  status = ( char * ) malloc( STATUS_LENGTH + 1 );
+  memset( status, NULL, STATUS_LENGTH + 1 );
+  
+  // Get status
+  strncpy ( status, strstr ( message, PARM_STATUS ) + strlen ( PARM_STATUS ), STATUS_LENGTH );
+  
+  statusInt = atoi( status );
+  
+  // Get new OTK
+  socket.setOneTimeKey( strstr ( &message[ 0 ], PARM_NEW_ONE_TIME_KEY ) + strlen( PARM_NEW_ONE_TIME_KEY ) );
+  
+  if( statusInt == 0 && status[0] == '0' )
+  {
+    free( status );
+    
+    // TODO: Output pins!
+    Serial.println("SUCCESS!");
+    digitalWrite( PIN_LED, LOW );
+    // Sleep for default of 5 seconds (unless otherwise specified)
+    delay( 5000 );
+    digitalWrite( PIN_LED, HIGH );
+  }
+  else
+  {
+    Serial.println("FAILURE!");
+    free( status );
+    if( statusInt == 0 )
+    {
+      statusInt = -1;
+    }
+  }
+  
+  return statusInt;
+}
 void sendRfidPackage( unsigned long rfidID, TCPSocket socket )
 {
 	char * data;
+        int msgLength = 0;
+        char* received;
 	
 	data = ( char * ) malloc( strlen( RFID_ID ) + RFID_ID_VALUE_LENGTH + 1 );
   memset( data, NULL, strlen( RFID_ID ) + RFID_ID_VALUE_LENGTH + 1 );
@@ -107,13 +165,26 @@ void sendRfidPackage( unsigned long rfidID, TCPSocket socket )
 	Serial.println( data );
 	
 	socket.sendClientMessage( RFID_URI, data );
+        free( data );
+        received = ( char * ) malloc( sizeof( char ) * ( CLIENT_BUFFER_LENGTH + 1 ) );
+        socket.receiveClientMessage( received );
+        Serial.println( received );
+        processClientMessage( received, socket );
 	
-	free( data );
+	free( received );
 }
 
 void setupReader( )
 {
   wg.begin( );
+  
+  pinMode( PIN_DATA0, INPUT );
+  pinMode( PIN_DATA1, INPUT );
+  pinMode( PIN_LED, OUTPUT );
+  pinMode( PIN_BEEP, OUTPUT );
+  
+  digitalWrite( PIN_LED, HIGH );
+  digitalWrite( PIN_BEEP, HIGH );
 }
 
 int freeRam ( ) {

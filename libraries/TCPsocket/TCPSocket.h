@@ -64,36 +64,6 @@
 #define POST_DATA_LENGTH 97 //POST_DATA_KEY_POSITION + KEY_LENGTH + 1 // 96 123
 #endif
 
-// /*********************************************************
-//  * BEGIN MAC Address Byte Definitions                    *
-//  *********************************************************/
-// #ifndef MAC0
-// #define MAC0 0x00
-// #endif
-// 
-// #ifndef MAC1
-// #define MAC1 0x11
-// #endif
-// 
-// #ifndef MAC2
-// #define MAC2 0x22
-// #endif
-// 
-// #ifndef MAC3
-// #define MAC3 0x33
-// #endif
-// 
-// #ifndef MAC4
-// #define MAC4 0x44
-// #endif
-// 
-// #ifndef MAC5
-// #define MAC5 0x56
-// #endif
-
-// extern byte mac[ ];// = { 
-//   MAC0, MAC1, MAC2, MAC3, MAC4, MAC5 };
-
 
 /*********************************************************
  *   END MAC Address Byte Definitions                    *
@@ -115,7 +85,7 @@
 #endif
 
 #ifndef IP3
-#define IP3 131 //131 is me, 114 is brian's dev environment
+#define IP3 114 //131 is me, 114 is brian's dev environment
 #endif
 // 
 extern byte ip[ ];// = { 
@@ -144,6 +114,7 @@ class TCPSocket
 		TCPSocket( char * initKey, byte macReceived[ ] );
 		int receiveClientMessage( char* readString );
 		int sendClientMessage( char * uri, char * data );
+		int setOneTimeKey( char * key );
 		
 	private:
 		byte * mac;

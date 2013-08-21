@@ -40,6 +40,8 @@ server( LOCAL_SERVER_PORT )	// initialization list
 	
 	for( int status = -1, i = 0; status != 0 && i < 2; i++ )
 	{
+		Serial.print("i = ");
+		Serial.println(i);
 		if( i == 0 ) setupClient( false, initKey );
 		else setupClient( true, initKey );
 		//Serial.println( "Success." );
@@ -60,8 +62,7 @@ server( LOCAL_SERVER_PORT )	// initialization list
 	  client.stop( );
 
 	  if( messageLength > 0 )
-		{
-			// Serial.println( "processAuthenticationMessage here" );
+      {
 	    status = processAuthenticationMessage( readString );
 	  }
 	}
@@ -71,16 +72,13 @@ server( LOCAL_SERVER_PORT )	// initialization list
 
 void TCPSocket::initEthernet( )
 {
-  Serial.print( "Initializing ethernet port..." );
+  Serial.print( "EthernetInit" );
   Ethernet.begin( mac );
-	Serial.println( " done." );
 }
 
 void TCPSocket::setupServer( )
 {
-  Serial.print( "Starting server..." );
   server.begin( );
-  Serial.print( "started at " );
   Serial.println( Ethernet.localIP( ) );
 }
 
@@ -94,7 +92,6 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
 	
 	key = &postData[ POST_DATA_KEY_POSITION ];
 	
-  Serial.println( "Starting client..." );
   // Build payload
   if ( secondTry == true )
 	{
@@ -111,14 +108,10 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
     Serial.println( "\"" );
   }
 
-	// Serial.print("Free ram: ");
-	// 	Serial.println(freeRam());
+	
   
   sprintf( postData, "%s%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%%3A%0.2x%s%s", KEY_MAC, mac[0], mac[1],
     mac[2], mac[3], mac[4], mac[5], KEY_INIT, key );
-
-	Serial.print( "Characters at key position: " );
-	Serial.println( key );
   
   if ( client.connect( ip, REMOTE_SERVER_PORT ) )
 	{
@@ -138,7 +131,7 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
   }
 	else
 	{
-		Serial.println( "Unable to connect to server." );
+		Serial.println( "ConnectErr" );
 		Serial.println( "DELAY" );
 		// Serial.print("Free ram: ");
 		// 		Serial.println(freeRam());
@@ -158,13 +151,15 @@ int TCPSocket::receiveClientMessage( char* readString )
 	// empty readString
 	memset( readString, NULL, CLIENT_BUFFER_LENGTH );
 	
+	while( !client.available( ) ) { }; // Wait
+	
 	while ( client.available( ) )
 	{
     readFromClient( readString, &lastCharWasCR, &lastCharWasLF, &readStringIndex, &crlfCount );
 		//Serial.print( "readFromClient result: " );
 		//Serial.println( readString );
   }
-	Serial.println( "Successfully read message." );
+	Serial.println( "ReadMSG" );
 	
 	// Serial.print("Free ram: ");
 	// 	Serial.println(freeRam());
@@ -223,36 +218,38 @@ void TCPSocket::readFromClient( char* readString, bool *lastCharWasCR, bool *las
 int TCPSocket::processAuthenticationMessage( char * readString )
 {
 	//char newInitKey[ KEY_LENGTH + 1 ];
+	int statusInt = -1;
 	char * status;
 	char * newInitKey;
 	
-	newInitKey = ( char * ) malloc( KEY_LENGTH + 1 );
 	status = ( char * ) malloc( STATUS_LENGTH + 1 );
 	
 	memset( status, NULL, STATUS_LENGTH + 1 );
-	memset( newInitKey, NULL, KEY_LENGTH + 1 );
 		
 	// Get status
 	strncpy ( status, strstr ( readString, PARM_STATUS ) + strlen( PARM_STATUS ), STATUS_LENGTH ); // Get status value
 		
-		Serial.print ( "All text following status: " );
+		Serial.print ( "St:" );
 		Serial.println ( status );
 		
+		statusInt = atoi( status );
+		
 		// If successfully verified key
-		if( atoi( status ) == 0 )
+		if( statusInt == 0 && status[0] == '0' )
 		{
-			Serial.println( "Suceeded in verifying key." );
+			free( status );
 			
 			// Get new initialization key
+			newInitKey = ( char * ) malloc( KEY_LENGTH + 1 );
+			memset( newInitKey, NULL, KEY_LENGTH + 1 );
 			strncpy ( newInitKey, strstr ( &readString[ 0 ], PARM_NEW_INIT_KEY ) + strlen( PARM_NEW_INIT_KEY ), KEY_LENGTH ); // Get start of new init key
 			
 			// Write the key to EEPROM
 			if ( newInitKey != NULL )
 			{
-				Serial.print ( "New initialization key is ");
-		          Serial.println ( newInitKey );
-		    EEPROMx.writeToEEPROM( newInitKey );
-				Serial.println( "Wrote to EEPROM." );
+				Serial.print ( "NewInit: ");
+		        Serial.println ( newInitKey );
+				EEPROMx.writeToEEPROM( newInitKey );
 			}
 			
 			// de-allocated memory for initialization key after storing to EEPROM
@@ -263,12 +260,20 @@ int TCPSocket::processAuthenticationMessage( char * readString )
 			
 			if ( oneTimeKey != NULL )
 			{
-				Serial.print ( "New one-time key is ");
-		          Serial.println ( oneTimeKey );
+				Serial.print ( "NewOTK: ");
+		        Serial.println ( oneTimeKey );
+			}
+		}
+		else
+		{
+			free( status );
+			if( statusInt == 0 )
+			{
+				statusInt = -1;
 			}
 		}
 		
-		return atoi( status );
+		return statusInt;
 }
 
 int TCPSocket::sendClientMessage( char * uri, char * data )
@@ -284,10 +289,6 @@ int TCPSocket::sendClientMessage( char * uri, char * data )
   if ( client.connect( ip, REMOTE_SERVER_PORT ) )
 	{
     Serial.println( "Client connected." );
-    Serial.print("postData: ");
-		Serial.println( postData );
-		Serial.print("postData length: ");
-		Serial.println( strlen( postData ) );
     client.print( "POST " );
 			client.print( uri );
 			client.println( " HTTP/1.1" );
@@ -301,10 +302,8 @@ int TCPSocket::sendClientMessage( char * uri, char * data )
   }
 	else
 	{
-		Serial.println( "Unable to connect to server." );
+		Serial.println( "ConnErr" );
 		Serial.println( "DELAY" );
-		// Serial.print("Free ram: ");
-		// 		Serial.println(freeRam());
 		delay( 1000 );
 	}
 	
@@ -315,6 +314,11 @@ int TCPSocket::freeRam ( ) {
   extern int __heap_start, *__brkval; 
   int v; 
   return ( int ) &v - ( __brkval == 0 ? ( int ) &__heap_start : ( int ) __brkval ); 
+}
+
+int TCPSocket::setOneTimeKey( char * key )
+{
+	strncpy( oneTimeKey, key, KEY_LENGTH );
 }
 
 //TCPSocket TCPSocket;
