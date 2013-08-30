@@ -120,7 +120,7 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
 		Serial.println( postData );
 		Serial.print("postData length: ");
 		Serial.println( strlen( postData ) );
-    client.println( "POST /api/v1/online.txt HTTP/1.1" );
+    client.println( "POST /api/v1/online.txt HTTP/1.0" );
     client.println( "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" ); 
     client.println( "Host: dev-environment:3000" );
     client.println( "Connection: close" );
@@ -291,7 +291,7 @@ int TCPSocket::sendClientMessage( char * uri, char * data )
     Serial.println( "Client connected." );
     client.print( "POST " );
 			client.print( uri );
-			client.println( " HTTP/1.1" );
+			client.println( " HTTP/1.0" );
     client.println( "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" ); 
     client.println( "Host: dev-environment:3000" );
     client.println( "Connection: close" );
