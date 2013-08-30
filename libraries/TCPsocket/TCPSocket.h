@@ -14,7 +14,7 @@
 #endif
 
 #ifndef REMOTE_SERVER_PORT
-#define REMOTE_SERVER_PORT 3000
+#define REMOTE_SERVER_PORT 80
 #endif
 /*********************************************************
  *   END Port Definitions                                *
@@ -85,7 +85,7 @@
 #endif
 
 #ifndef IP3
-#define IP3 114 //131 is me, 114 is brian's dev environment
+#define IP3 213 //131 is me, 114 is brian's dev environment
 #endif
 // 
 extern byte ip[ ];// = { 
