@@ -95,6 +95,31 @@ extern byte ip[ ];// = {
 /*********************************************************
  *   END IP Address Definitions                          *
  *********************************************************/
+ 
+ /*********************************************************
+ * BEGIN HTTP Request Types                              *
+ *********************************************************/
+ #ifndef REQ_POST
+ #define REQ_POST "POST"
+ #endif
+ 
+ #ifndef REQ_PUT
+ #define REQ_PUT "PUT"
+ #endif
+ /*********************************************************
+ *   END HTTP Request Types                              *
+ *********************************************************/
+ 
+ /*********************************************************
+ * BEGIN Request URIs                                    *
+ *********************************************************/
+ #ifndef URI_ONLINE
+ #define URI_ONLINE "/api/v1/online.txt"
+ #endif
+ /*********************************************************
+ *   END Request URIs                                    *
+ *********************************************************/
+ 
 
 const char CR = 13;
 const char LF = 10;
@@ -127,6 +152,7 @@ class TCPSocket
 		void initEthernet( );
 		void readFromClient( char* readString, bool *lastCharWasCR, bool *lastCharWasLF, int *readStringIndex, unsigned char *crlfCount );
 		void setupClient( boolean secondTry, char * initKey );
+		void sendData( char * requestType, char * uri, char * data );
 		//char * initializeOneTimeKey( );
 		int processAuthenticationMessage( char * readString );
 		int freeRam ();

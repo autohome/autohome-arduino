@@ -9,8 +9,6 @@
 // TCPSocket Constructor class: initializes EthernetServer server via an "initialization list" and then
 //																						the rest of the server/ethernet setup
 
-//byte mac[ ] = { 
-//  MAC0, MAC1, MAC2, MAC3, MAC4, MAC5 };
 
 byte ip[ ] = { 
   IP0, IP1, IP2, IP3 };
@@ -46,19 +44,15 @@ server( LOCAL_SERVER_PORT )	// initialization list
 		else setupClient( true, initKey );
 		//Serial.println( "Success." );
 	
-		while( !client.available( ) )
-		{
-			Serial.println( "Client not available." );
-		}
+		// Sleep until client available
+		while( !client.available( ) ) { }
+		
 		Serial.println( "Client available." );
 	
 		messageLength = receiveClientMessage( readString );
-		Serial.print("Data received: ");
-		Serial.println( readString );
 
 		while( client.connected( ) || client.available( ) ) { }	// wait
 
-		//Serial.println( "Cleint disconnected" );
 	  client.stop( );
 
 	  if( messageLength > 0 )
@@ -72,14 +66,12 @@ server( LOCAL_SERVER_PORT )	// initialization list
 
 void TCPSocket::initEthernet( )
 {
-  Serial.print( "EthernetInit" );
   Ethernet.begin( mac );
 }
 
 void TCPSocket::setupServer( )
 {
   server.begin( );
-  Serial.println( Ethernet.localIP( ) );
 }
 
 // setupClient(): initialize communication client between local node (arduino) and remote server
@@ -102,10 +94,7 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
 	else
 	{
 		// first try the maintained EEPROM key
-    Serial.print( "Reading EEPROM...\"" );
-    EEPROMx.readFromEEPROM( key, KEY_LENGTH );
-    Serial.print( key );
-    Serial.println( "\"" );
+		EEPROMx.readFromEEPROM( key, KEY_LENGTH );
   }
 
 	
@@ -116,25 +105,11 @@ void TCPSocket::setupClient( boolean secondTry, char * initKey )
   if ( client.connect( ip, REMOTE_SERVER_PORT ) )
 	{
     Serial.println( "Client connected." );
-    Serial.print("postData: ");
-		Serial.println( postData );
-		Serial.print("postData length: ");
-		Serial.println( strlen( postData ) );
-    client.println( "POST /api/v1/online.txt HTTP/1.0" );
-    client.println( "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" ); 
-    client.println( "Host: dev-environment:3000" );
-    client.println( "Connection: close" );
-    client.print( "Content-Length: " );
-    client.println( strlen( postData ) );
-    client.println( "" );
-    client.print( postData );
+	sendData( REQ_POST, URI_ONLINE, postData );
   }
 	else
 	{
-		Serial.println( "ConnectErr" );
-		Serial.println( "DELAY" );
-		// Serial.print("Free ram: ");
-		// 		Serial.println(freeRam());
+		Serial.println( "ConnErr" );
 		delay( 1000 );
 	}
 }
@@ -156,13 +131,7 @@ int TCPSocket::receiveClientMessage( char* readString )
 	while ( client.available( ) )
 	{
     readFromClient( readString, &lastCharWasCR, &lastCharWasLF, &readStringIndex, &crlfCount );
-		//Serial.print( "readFromClient result: " );
-		//Serial.println( readString );
   }
-	Serial.println( "ReadMSG" );
-	
-	// Serial.print("Free ram: ");
-	// 	Serial.println(freeRam());
 	
 	return readStringIndex;	
 }
@@ -247,8 +216,6 @@ int TCPSocket::processAuthenticationMessage( char * readString )
 			// Write the key to EEPROM
 			if ( newInitKey != NULL )
 			{
-				Serial.print ( "NewInit: ");
-		        Serial.println ( newInitKey );
 				EEPROMx.writeToEEPROM( newInitKey );
 			}
 			
@@ -257,12 +224,6 @@ int TCPSocket::processAuthenticationMessage( char * readString )
 		
 			// Get new one-time key
 			strncpy ( oneTimeKey, strstr ( &readString[ 0 ], PARM_NEW_ONE_TIME_KEY ) + strlen( PARM_NEW_ONE_TIME_KEY ), KEY_LENGTH ); // Get start of new init key
-			
-			if ( oneTimeKey != NULL )
-			{
-				Serial.print ( "NewOTK: ");
-		        Serial.println ( oneTimeKey );
-			}
 		}
 		else
 		{
@@ -289,25 +250,43 @@ int TCPSocket::sendClientMessage( char * uri, char * data )
   if ( client.connect( ip, REMOTE_SERVER_PORT ) )
 	{
     Serial.println( "Client connected." );
-    client.print( "POST " );
-			client.print( uri );
-			client.println( " HTTP/1.0" );
-    client.println( "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" ); 
-    client.println( "Host: dev-environment:3000" );
-    client.println( "Connection: close" );
-    client.print( "Content-Length: " );
-    client.println( strlen( postData ) );
-    client.println( "" );
-    client.print( postData );
+	sendData( REQ_POST, uri, postData );
   }
 	else
 	{
 		Serial.println( "ConnErr" );
-		Serial.println( "DELAY" );
 		delay( 1000 );
 	}
 	
 	return 0;
+}
+
+void TCPSocket::sendData( char * requestType, char * uri, char * data )
+{
+	int postBody = 0;
+	if ( strcmp( requestType, REQ_POST ) == 0 ||
+		 strcmp( requestType, REQ_PUT ) == 0 )
+	{
+		postBody = 1;
+	}
+	
+	client.print( requestType );
+	client.print( " " );
+	client.print( uri );
+	client.println( " HTTP/1.0" );
+	if( postBody == 1 )
+	{
+		client.println( "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" ); 
+	}
+    client.println( "Host: dev-environment:3000" );
+    client.println( "Connection: close" );
+    client.print( "Content-Length: " );
+    client.println( strlen( data ) );
+    client.println( "" );
+	if( postBody == 1 )
+	{
+		client.print( data );
+	}
 }
 
 int TCPSocket::freeRam ( ) {
